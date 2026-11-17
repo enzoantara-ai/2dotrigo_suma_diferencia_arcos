@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vuelta completa · Suma y diferencia de dos arcos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef4fb; --grid:#d3e0f0; --ink:#14213d; --blue:#2b59c3; --blue-soft:#e3ecfd;
+    --mark:#ffd23f; --ok:#1a8a5c; --ok-soft:#d8f2e6; --bad:#d9411e; --bad-soft:#fde3db; --muted:#4a5878;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Lexend","Trebuchet MS",system-ui,sans-serif; color:var(--ink); line-height:1.5;
+    background-color:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px; min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+  h1{font-size:clamp(1.9rem,6vw,2.8rem);line-height:1.1;margin:0 0 8px}
+  h1 mark,.num mark{background:linear-gradient(transparent 55%,var(--mark) 55%);color:inherit;padding:0 .1em}
+  p{margin:0 0 12px}
+  .card{background:#fff;border:2px solid var(--ink);border-radius:14px;padding:20px;box-shadow:5px 5px 0 var(--ink)}
+  .btn{font:inherit;font-weight:700;font-size:1.05rem;background:var(--blue);color:#fff;border:2px solid var(--ink);border-radius:10px;padding:12px 22px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+  .btn:hover{background:#1f46a3}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.ghost{background:#fff;color:var(--ink)}
+  .btn.ghost:hover{background:var(--blue-soft)}
+  button:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+  .hidden{display:none}
+
+  /* intro */
+  .intro ul{padding-left:20px;margin:0 0 18px}
+  .intro li{margin-bottom:6px}
+  .tag{display:inline-block;background:var(--mark);border:2px solid var(--ink);border-radius:8px;padding:2px 10px;font-weight:700;font-size:.9rem;margin-bottom:12px}
+
+  /* top bar with the angle ring */
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .ring{flex:0 0 auto;position:relative;width:84px;height:84px}
+  .ring svg{width:84px;height:84px;transform:rotate(-90deg)}
+  .ring .track{fill:#fff;stroke:var(--grid);stroke-width:8}
+  .ring .arc{fill:none;stroke:var(--blue);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+  .ring .deg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.05rem}
+  .top .info{font-size:.95rem;color:var(--muted)}
+  .top .info b{color:var(--ink);font-size:1.1rem}
+
+  /* question */
+  .num{font-weight:700;font-size:1.05rem;margin-bottom:10px}
+  .q{font-size:1.2rem;margin-bottom:16px}
+  .math{font-size:1.25rem;display:block;margin:10px 0;overflow-x:auto}
+  .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 4px}
+  .fr>span:first-child{border-bottom:2px solid var(--ink);padding:0 4px 2px}
+  .fr>span:last-child{padding:2px 4px 0}
+  .opts{display:grid;gap:10px}
+  .opt{font:inherit;font-size:1.1rem;text-align:left;background:#fff;color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;gap:12px;align-items:center}
+  .opt .l{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--blue-soft);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem}
+  .opt:hover:not(:disabled){background:var(--blue-soft)}
+  .opt:disabled{cursor:default}
+  .opt.ok{background:var(--ok-soft);border-color:var(--ok)}
+  .opt.ok .l{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .opt.bad{background:var(--bad-soft);border-color:var(--bad)}
+  .opt.bad .l{background:var(--bad);color:#fff;border-color:var(--bad)}
+  .hint-row{margin-top:14px}
+  .hint{margin-top:10px;background:#fff8dc;border-left:6px solid var(--mark);padding:10px 14px;border-radius:6px}
+  .fb{margin-top:16px;padding:14px 16px;border-radius:10px;border:2px solid var(--ink)}
+  .fb.ok{background:var(--ok-soft);border-color:var(--ok)}
+  .fb.bad{background:var(--bad-soft);border-color:var(--bad)}
+  .fb h3{margin:0 0 6px;font-size:1.15rem}
+  .fb .why{font-size:1.02rem}
+  .next-row{margin-top:16px;text-align:right}
+
+  /* end */
+  .big{font-size:clamp(2.6rem,12vw,4.2rem);font-weight:700;line-height:1;margin:6px 0 10px}
+  .review{background:var(--blue-soft);border-radius:10px;padding:12px 14px;margin:14px 0}
+  .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+
+  @media (prefers-reduced-motion:reduce){.ring .arc{transition:none}}
+  @media (max-width:420px){.card{padding:16px}.opt{font-size:1rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- INICIO -->
+  <section id="intro" class="intro">
+    <div class="card">
+      <span class="tag">2do de secundaria · Trigonometría</span>
+      <h1>Vuelta completa: <mark>suma y diferencia</mark> de dos arcos</h1>
+      <p>Responde 10 preguntas. Cada respuesta te hace avanzar 36° en la circunferencia trigonométrica; si terminas las 10, ¡das la vuelta completa de 360°!</p>
+      <ul>
+        <li>Puedes usar papel y lápiz para desarrollar.</li>
+        <li>Si te atascas, toca <b>Ver pista</b>. No quita puntos.</li>
+        <li>Después de cada respuesta verás cómo se resuelve.</li>
+        <li>Puedes jugar las veces que quieras: las alternativas cambian de orden.</li>
+      </ul>
+      <button class="btn" id="start">Empezar</button>
+    </div>
+  </section>
+
+  <!-- JUEGO -->
+  <section id="game" class="hidden" aria-live="polite">
+    <div class="top">
+      <div class="ring" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="42"/><circle class="arc" id="arc" cx="50" cy="50" r="42" stroke-dasharray="263.9" stroke-dashoffset="263.9"/></svg>
+        <div class="deg" id="deg">0°</div>
+      </div>
+      <div class="info">Pregunta <b id="qn">1</b> de 10<br>Aciertos: <b id="sc">0</b></div>
+    </div>
+    <div class="card">
+      <div class="num"><mark id="qtag">Pregunta 1</mark></div>
+      <div class="q" id="qtext"></div>
+      <div class="opts" id="opts"></div>
+      <div class="hint-row">
+        <button class="btn ghost" id="hintBtn" type="button">Ver pista</button>
+        <div class="hint hidden" id="hint"></div>
+      </div>
+      <div class="fb hidden" id="fb"></div>
+      <div class="next-row"><button class="btn hidden" id="next" type="button">Siguiente</button></div>
+    </div>
+  </section>
+
+  <!-- FIN -->
+  <section id="end" class="hidden">
+    <div class="card">
+      <span class="tag">Resultado</span>
+      <div class="big" id="final"></div>
+      <p id="msg"></p>
+      <div class="review hidden" id="review"></div>
+      <div class="actions">
+        <button class="btn" id="again" type="button">Jugar otra vez</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  function fr(n,d){return '<span class="fr"><span>'+n+'</span><span>'+d+'</span></span>';}
+
+  var Q = [
+    { t:'Laura afirma que <b>sen(30° + 60°) = sen30° + sen60°</b>. Con la calculadora, sen30° + sen60° ≈ 0,5 + 0,87. ¿Qué respondes?',
+      o:['Tiene razón: el seno se reparte entre los dos ángulos.',
+         'No tiene razón: da 1,37 y el seno nunca pasa de 1 (además sen90° = 1).',
+         'Tiene razón, porque 0,5 + 0,87 = 1 y sen90° = 1.',
+         'No tiene razón, porque 30° + 60° no es 90°.'],
+      ok:1,
+      hint:'Calcula sen90° y compáralo con la suma 0,5 + 0,87. ¿Qué valor máximo puede tener un seno?',
+      why:'El seno <b>no se reparte</b>: sen(α+β) ≠ senα + senβ. La fórmula correcta es sen(α+β) = senα·cosβ + cosα·senβ. Comprobamos: sen30°·cos60° + cos30°·sen60° = ½·½ + (√3/2)·(√3/2) = ¼ + ¾ = 1.' },
+
+    { t:'Calcula el valor de <span class="math">M = sen70°·cos10° − sen10°·cos70°</span>',
+      o:['½','√3/2','√2/2','1'], ok:1,
+      hint:'Mira la forma senα·cosβ − cosα·senβ. ¿A qué fórmula se parece?',
+      why:'Es sen(α−β) = senα·cosβ − cosα·senβ, con α = 70° y β = 10°. Entonces M = sen(70° − 10°) = sen60° = <b>√3/2</b>.' },
+
+    { t:'Calcula el valor de <span class="math">E = cos25°·cos35° − sen35°·sen25°</span>',
+      o:['½','√3/2','cos10°','1'], ok:0,
+      hint:'En el coseno de una suma, el signo del medio es contrario: cosα·cosβ − senα·senβ.',
+      why:'Es cos(α+β) = cosα·cosβ − senα·senβ. Entonces E = cos(25° + 35°) = cos60° = <b>½</b>.' },
+
+    { t:'Calcula un valor agudo de <b>x</b> si: <span class="math">senx·cos20° + sen20°·cosx = sen70°</span>',
+      o:['20°','40°','50°','70°'], ok:2,
+      hint:'El lado izquierdo es un seno de una suma. Redúcelo y compara los ángulos de los dos lados.',
+      why:'Es sen(x + 20°) = sen70°. Si los senos son iguales (ángulos agudos), los ángulos son iguales: x + 20° = 70°, entonces <b>x = 50°</b>.' },
+
+    { t:'Calcula el valor exacto de <b>sen15°</b>. Pista de la clase: 15° = 45° − 30°.',
+      o:['(√6 − √2)/4','(√6 + √2)/4','(√2 − 1)/2','(√3 − 1)/2'], ok:0,
+      hint:'Usa sen(α−β) = senα·cosβ − cosα·senβ con α = 45° y β = 30°.',
+      why:'sen15° = sen45°·cos30° − cos45°·sen30° = (√2/2)(√3/2) − (√2/2)(½) = (√6 − √2)/4 <b>≈ 0,259</b>. La opción (√2 − 1)/2 sale de restar sen45° − sen30°, que es el error que vimos al inicio de la clase.' },
+
+    { t:'Simplifica: <span class="math">C = '+fr('sen3x·cos2x + sen2x·cos3x','sen4x·cosx + senx·cos4x')+'</span>',
+      o:['1','0','sen5x','2'], ok:0,
+      hint:'Reduce primero el numerador y luego el denominador. Fíjate en la suma de los ángulos en cada uno.',
+      why:'Numerador: sen(3x + 2x) = sen5x. Denominador: sen(4x + x) = sen5x. Entonces C = sen5x / sen5x = <b>1</b>.' },
+
+    { t:'Simplifica: <span class="math">L = '+fr('sen(α + θ) − senα·cosθ','cosα·cosθ')+'</span>',
+      o:['tgα','tgθ','senθ','1'], ok:1,
+      hint:'Desarrolla sen(α+θ) y cancela lo que se repite.',
+      why:'sen(α+θ) = senα·cosθ + cosα·senθ. Al restar senα·cosθ queda cosα·senθ. Entonces L = (cosα·senθ)/(cosα·cosθ) = senθ/cosθ = <b>tgθ</b>.' },
+
+    { t:'Simplifica: <span class="math">N = cos(x − 30°) − cos(x + 30°)</span>',
+      o:['senx','cosx','√3·cosx','2senx'], ok:0,
+      hint:'Desarrolla los dos cosenos. Los términos con cosx·cos30° se cancelan. Recuerda que sen30° = ½.',
+      why:'cos(x−30°) = cosx·cos30° + senx·sen30° y cos(x+30°) = cosx·cos30° − senx·sen30°. Al restar queda 2·senx·sen30° = 2·senx·½ = <b>senx</b>.' },
+
+    { t:'Si <b>senx = 5/13</b> y <b>tgy = 3/4</b> (x e y agudos), calcula <b>sen(x + y)</b>.',
+      o:['56/65','33/65','63/65','8/13'], ok:0,
+      hint:'Dibuja dos triángulos rectángulos: uno de catetos 5 y 12 (hipotenusa 13) y otro de catetos 3 y 4 (hipotenusa 5).',
+      why:'Del triángulo 5-12-13: cosx = 12/13. Del triángulo 3-4-5: seny = 3/5 y cosy = 4/5. Entonces sen(x+y) = (5/13)(4/5) + (12/13)(3/5) = 20/65 + 36/65 = <b>56/65</b>. (33/65 sería cos(x+y).)' },
+
+    { t:'Calcula el valor de <span class="math">E = (cos50° + cos20°)² + (sen50° + sen20°)²</span>',
+      o:['2','2 + √3','2 + √3/2','2√3'], ok:1,
+      hint:'Desarrolla los dos cuadrados. Recuerda que sen²θ + cos²θ = 1. Al final queda cos50°·cos20° + sen50°·sen20°.',
+      why:'Al desarrollar: (cos²50° + sen²50°) + (cos²20° + sen²20°) + 2(cos50°·cos20° + sen50°·sen20°) = 1 + 1 + 2·cos(50° − 20°) = 2 + 2·cos30° = 2 + 2·(√3/2) = <b>2 + √3</b>.' }
+  ];
+
+  var $ = function(id){return document.getElementById(id)};
+  var CIRC = 2 * Math.PI * 42;
+  var order, i, score, answered, wrongs;
+
+  function shuffle(a){
+    for (var k=a.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=a[k];a[k]=a[j];a[j]=t;}
+    return a;
+  }
+  function setRing(n){
+    $('arc').style.strokeDashoffset = (CIRC * (1 - n/10)).toFixed(1);
+    $('deg').textContent = (n*36) + '°';
+  }
+  function show(id){
+    ['intro','game','end'].forEach(function(s){ $(s).classList.toggle('hidden', s!==id); });
+    window.scrollTo(0,0);
+  }
+  function start(){
+    i = 0; score = 0; wrongs = [];
+    $('sc').textContent = 0;
+    setRing(0);
+    show('game');
+    render();
+  }
+  function render(){
+    var q = Q[i];
+    answered = false;
+    $('qn').textContent = i+1;
+    $('qtag').textContent = 'Pregunta ' + (i+1);
+    $('qtext').innerHTML = q.t;
+    $('hint').classList.add('hidden');
+    $('hint').innerHTML = '<b>Pista:</b> ' + q.hint;
+    $('hintBtn').classList.remove('hidden');
+    $('fb').classList.add('hidden');
+    $('next').classList.add('hidden');
+    $('next').textContent = (i === Q.length-1) ? 'Ver mi resultado' : 'Siguiente';
+    var opts = q.o.map(function(txt,idx){return {txt:txt, right:idx===q.ok};});
+    shuffle(opts);
+    var box = $('opts'); box.innerHTML = '';
+    opts.forEach(function(o,k){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'opt'; b.dataset.right = o.right ? '1' : '0';
+      b.innerHTML = '<span class="l">' + 'ABCD'.charAt(k) + '</span><span>' + o.txt + '</span>';
+      b.addEventListener('click', function(){ choose(b); });
+      box.appendChild(b);
+    });
+  }
+  function choose(btn){
+    if (answered) return;
+    answered = true;
+    var right = btn.dataset.right === '1';
+    var all = $('opts').querySelectorAll('.opt');
+    for (var k=0;k<all.length;k++){
+      all[k].disabled = true;
+      if (all[k].dataset.right === '1') all[k].classList.add('ok');
+    }
+    if (!right) btn.classList.add('bad');
+    if (right) { score++; $('sc').textContent = score; } else { wrongs.push(i+1); }
+    setRing(i+1);
+    var fb = $('fb');
+    fb.className = 'fb ' + (right ? 'ok' : 'bad');
+    fb.innerHTML = '<h3>' + (right ? '¡Correcto!' : 'Todavía no') + '</h3><div class="why">' + Q[i].why + '</div>';
+    $('hintBtn').classList.add('hidden');
+    $('hint').classList.add('hidden');
+    $('next').classList.remove('hidden');
+    $('next').focus();
+  }
+  function next(){
+    if (i < Q.length-1){ i++; render(); } else { finish(); }
+  }
+  function finish(){
+    show('end');
+    $('final').textContent = score + ' / 10';
+    var m;
+    if (score === 10) m = '¡Vuelta completa de 360° y sin errores! Ya dominas la suma y la diferencia de arcos.';
+    else if (score >= 8) m = 'Muy bien. Revisa las preguntas que fallaste y juega de nuevo para llegar a 10.';
+    else if (score >= 5) m = 'Vas por buen camino. Repasa las cuatro fórmulas en tu ficha y vuelve a intentarlo.';
+    else m = 'Aún te falta práctica. Vuelve a leer la deducción de las fórmulas en la ficha, resuelve los problemas 1 al 5 y juega otra vez.';
+    $('msg').textContent = m;
+    var r = $('review');
+    if (wrongs.length){
+      r.classList.remove('hidden');
+      r.innerHTML = '<b>Repasa las preguntas:</b> ' + wrongs.join(', ') + '. Al volver a jugar, las alternativas cambian de orden.';
+    } else { r.classList.add('hidden'); }
+  }
+
+  $('start').addEventListener('click', start);
+  $('again').addEventListener('click', start);
+  $('next').addEventListener('click', next);
+  $('hintBtn').addEventListener('click', function(){ $('hint').classList.toggle('hidden'); });
+})();
+</script>
+</body>
+</html>
